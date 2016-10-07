@@ -28,7 +28,7 @@ Given /^I am on the RottenPotatoes home page$/ do
    click_on "More about #{title}"
  end
 
- Then /^(?:|I )should see "([^"]*)"$/ do |text|
+ Then /^(?:|I )should see "(.*?)"$/ do |text|
     expect(page).to have_content(text)
  end
 
@@ -46,29 +46,83 @@ Given /^I am on the RottenPotatoes home page$/ do
 # Add a declarative step here for populating the DB with movies.
 
 Given /the following movies have been added to RottenPotatoes:/ do |movies_table|
-  pending  # Remove this statement when you finish implementing the test step
   movies_table.hashes.each do |movie|
     # Each returned movie will be a hash representing one row of the movies_table
     # The keys will be the table headers and the values will be the row contents.
     # Entries can be directly to the database with ActiveRecord methods
     # Add the necessary Active Record call(s) to populate the database.
+    Movie.create movie
   end
 end
 
-When /^I have opted to see movies rated: "(.*?)"$/ do |arg1|
+When /^I have opted to see movies rated: "(.*?)"$/ do |ratings|
   # HINT: use String#split to split up the rating_list, then
   # iterate over the ratings and check/uncheck the ratings
   # using the appropriate Capybara command(s)
-  pending  #remove this statement after implementing the test step
+=begin    
+    ratings.split(", ").each do |rating|
+       check('ratings_'+rating)
+    end
+    click_on "Refresh"
+=end
+
+    wantedRatings = ratings.split(", ")
+    Movie.all_ratings.each do |rating|
+        if wantedRatings.include? rating
+            check('ratings_'+rating)
+        else
+            uncheck('ratings_'+rating)
+        end
+    end
+    
+    click_on "Refresh"
 end
 
-Then /^I should see only movies rated: "(.*?)"$/ do |arg1|
-  pending  #remove this statement after implementing the test step
+Then /^I should see only movies rated: "(.*?)"$/ do |ratings|
+ 
+    expectation = true
+    wantedRatings = ratings.split(", ")
+    all("tr/td[2]").each do |movie|
+        if !wantedRatings.include? movie.text
+            expectation = false 
+        end
+    end
+    
+    expect(expectation).to be_truthy
+
+=begin
+    expectation = true
+    #allRatings = Movie.all_ratings
+    wantedRatings = ratings.split(", ")
+    Movie.all.each do |movie|
+        movieRating = movie.rating
+        if !wantedRatings.include? movieRating
+            expectation = false 
+        end
+    end
+    
+    expect(expectation).to be_truthy
+=end
 end
 
 Then /^I should see all of the movies$/ do
-  pending  #remove this statement after implementing the test step
+
+    size = Movie.all.size
+    size.should == ((page.all('table#movies tr').count) - 1)
+    
 end
 
+When /^I filter on "(.*?)"$/ do |filter|
+    click_link(filter)
+end
+
+Then /^The page should display "(.*?)" before "(.*?)"$/ do |movie1, movie2|
+
+    indexMovie1 = page.body.index(movie1)
+    indexMovie2 = page.body.index(movie2)
+    
+    expect(indexMovie1 < indexMovie2).to be_truthy
+    
+end
 
 

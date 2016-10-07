@@ -23,7 +23,11 @@ Background: movies have been added to database
 
 Scenario: sort movies alphabetically
   # your scenario here
+  When I filter on "Movie"
+  Then The page should display "Chicken Run" before "The Incredibles"
 
 Scenario: sort movies in increasing order of release date
-  # your scenario here
+  # your scenario her
+  When  I filter on "Release Date"
+  Then The page should display "1968-04-06 00:00:00 UTC" before "2001-04-25 00:00:00 UTC"
 
